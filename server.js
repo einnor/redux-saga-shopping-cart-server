@@ -75,6 +75,8 @@ nativeObject = YAML.load('database.yml',(database)=>{
     }
 
     app.get("/cart/add/:owner/:itemID",makeCartAdjustmentRoute(true));
+    app.get("/cart/remove/:owner/:itemID",makeCartAdjustmentRoute(false));
+   
     
 
     app.listen(port,()=>{
