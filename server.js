@@ -126,7 +126,61 @@ nativeObject = YAML.load('database.yml',(database)=>{
 	});
 	
 	
+	app.get("/cart/:owner",(req,res)=>{
+		const cart = req.cart;
+		res
+			.status(200)
+			.json(cart);
+		
+	});
 	
+	app.use(["/card/validate/:owner","/card/charge/:owner"],(req,res, next)=>{
+		const {owner} = req.params;
+		const card = database.cards.find(card=>card.owner === owner);
+		if (!card){
+			res.status(500).send({error:`No card is available for user ${owner}`});
+		}
+		req.card = card;
+		next();
+	});
+	
+	app.get("/card/validate/:owner",(req,res)=>{
+		const {card} = req;
+		res
+		.status(200)
+		.json({validated:true});
+	});
+	
+	app.get("/card/charge/:owner",(req,res)=>{
+		const {card, cart} = req;
+		const { owner } = req.params;
+		const country = database.users.find(user=>user.id === owner).country;
+		const total = cart.items.reduce((total,{quantity,id})=>{
+			const item = database.items.find(item=>item.id === id);
+			const symbol = country === "CAD" ? "cad" : "usd";
+			const baseValue = item[symbol];
+			total += baseValue * quantity;
+			return total;
+		},0);
+		
+		if (card.availableFunds <= total) {
+			return res
+				.status(402)
+				.json({success:false});
+		}
+		
+		card.availableFunds -= total;
+		res
+			.status(201)
+			.send({success:true});	
+			
+		
+	});
+	
+
+    
+
+    
 
     app.listen(port,()=>{
         console.log(`Redux Saga Cart backend server is listening on ${port}`)
