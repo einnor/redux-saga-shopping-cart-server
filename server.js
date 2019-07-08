@@ -180,6 +180,20 @@ nativeObject = YAML.load('database.yml',(database)=>{
 
     
 
+    app.get("/items/:ids",(req,res)=>{
+        const ids = req.params.ids.split(',');
+        const items = ids.map(id=>database.items.find(item=>item.id===id));
+        if (items.includes(undefined)) {
+            res
+                .status(500)
+                .json({error:"A specified ID had no matching item"});
+        } else {
+            res
+                .status(200)
+				.json(items);
+        }
+    });
+
     
 
     app.listen(port,()=>{
