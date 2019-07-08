@@ -194,6 +194,36 @@ nativeObject = YAML.load('database.yml',(database)=>{
         }
     });
 
+    app.get("/prices/:symbol/:ids",(req,res)=>{
+        const ids = req.params.ids.split(',');
+        const items = ids.map(id=>database.items.find(item=>item.id===id));
+        const supportedSymbols = ["CAD","USD"];
+        const symbol = req.params.symbol;
+        if (!supportedSymbols.includes(symbol)) {
+            return res
+                .status(403)
+                .json({
+                    error:"The currency symbol provided is inaccurate, see list of supported currencies",
+                    supportedSymbols
+                })
+        }
+
+
+        if (items.includes(undefined)) {
+            return res
+                .status(500)
+                .json({error:"A specified ID had no matching item"});
+        } else {
+            res
+                .status(200)
+                .json(items.map(item=>({
+                    id: item.id,
+                    symbol,
+                    price:symbol === "USD" ? item.usd : item.cad
+                })));
+        }
+    });
+
     
 
     app.listen(port,()=>{
