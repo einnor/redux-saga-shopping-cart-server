@@ -77,7 +77,24 @@ nativeObject = YAML.load('database.yml',(database)=>{
     app.get("/cart/add/:owner/:itemID",makeCartAdjustmentRoute(true));
     app.get("/cart/remove/:owner/:itemID",makeCartAdjustmentRoute(false));
    
-    
+    app.get("/user/:id",(req,res)=>{
+        const id = req.params.id;
+        const user = database.users.find(user=>user.id === id);
+        if (!user) {
+            return res
+                .status(500)
+                .json({
+                    error:"No user with the specified ID",
+                    id
+                })
+        } else {
+            res
+                .status(200)
+                .json(user)
+        }
+    });
+	
+	
 
     app.listen(port,()=>{
         console.log(`Redux Saga Cart backend server is listening on ${port}`)
