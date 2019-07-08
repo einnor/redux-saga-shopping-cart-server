@@ -94,6 +94,20 @@ nativeObject = YAML.load('database.yml',(database)=>{
         }
     });
 	
+	app.use(["/cart/validate/:owner","/cart/:owner","/card/charge/:owner"],(req,res,next)=>{
+		const { owner } = req.params;
+		const cart = database.carts.find(cart=>cart.owner === owner);
+		if (!cart){
+			return res
+				.status(404)
+				.json({error:"No cart with the specified owner",owner});
+		}
+		else {
+			req.cart = cart;
+			next();
+		}
+	});
+	
 	
 
     app.listen(port,()=>{
