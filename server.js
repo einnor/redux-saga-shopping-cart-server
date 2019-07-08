@@ -108,6 +108,24 @@ nativeObject = YAML.load('database.yml',(database)=>{
 		}
 	});
 	
+	app.get("/cart/validate/:owner",(req,res)=>{
+		const { items } = req.cart;		
+		let validated = true;
+		let error = null;
+		items.forEach(({id,quantity})=>{
+			const item = database.items.find(item => item.id === id);
+			if (item.quantityAvailable < quantity) {
+				validated = false;
+				error = "There is an insufficient quantity of " + id;
+			}
+		});;
+		res
+			.status(200)
+			.json({validated,error});
+		
+	});
+	
+	
 	
 
     app.listen(port,()=>{
