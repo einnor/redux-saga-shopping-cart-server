@@ -224,6 +224,26 @@ nativeObject = YAML.load('database.yml',(database)=>{
         }
     });
 
+    app.get('/shipping/:items',(req,res)=>{
+        const ids = req.params.items.split(',');
+        let total = 0;
+        ids.forEach(id=>{
+            const item = database.items.find(item=>item.id === id);
+            if (item.weight === 0) {
+                total += 0;
+            } else if (item.weight < 0.5) {
+                total += 3.5;
+            } else {
+                total += 8.5;
+            }
+        });
+        res
+            .status(200)
+            .json({
+                total
+            });
+    });
+
     
 
     app.listen(port,()=>{
